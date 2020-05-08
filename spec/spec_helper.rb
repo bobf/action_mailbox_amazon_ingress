@@ -12,6 +12,8 @@ ENV['SECRET_KEY_BASE'] = 'test-secret-key-base'
 
 require File.join(__dir__, 'support', 'dummy', 'config', 'environment.rb')
 
+ActiveRecord::Base.connection.migration_context.migrate
+
 RSpec.configure do |config|
   config.example_status_persistence_file_path = '.rspec_status'
   config.disable_monkey_patching!

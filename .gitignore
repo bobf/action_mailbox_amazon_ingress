@@ -12,5 +12,6 @@
 
 spec/support/dummy/tmp/*
 spec/support/dummy/log/*
+spec/support/dummy/db/*
 
 Gemfile.lock

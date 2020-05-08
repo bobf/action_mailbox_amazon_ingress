@@ -7,5 +7,6 @@ module Dummy
   class Application < Rails::Application
     config.load_defaults 6.0
     config.api_only = true
+    config.paths['db/migrate'] = 'spec/support/dummy/db/migrate'
   end
 end
