@@ -1,0 +1,20 @@
+Style/Documentation:
+  Enabled: false
+
+Metrics/AbcSize:
+  Exclude:
+    - 'db/migrate/**/*.rb'
+
+Metrics/MethodLength:
+  Exclude:
+    - 'db/migrate/**/*.rb'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+
+AllCops:
+  Exclude:
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'spec/support/dummy/**/*'
