@@ -15,3 +15,5 @@ spec/support/dummy/log/*
 spec/support/dummy/db/*
 
 Gemfile.lock
+
+.byebug_history

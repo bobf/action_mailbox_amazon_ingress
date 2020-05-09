@@ -1,11 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe 'subscription confirmation' do
-  def fixture(name, type)
-    root = ActionMailboxAmazonIngress.root
-    File.read(root.join('spec', 'fixtures', type.to_s, "#{name}.#{type}"))
-  end
-
   let!(:subscription_confirmation_request) do
     query = Rack::Utils.build_query(subscription_params)
     stub_request(:get, "https://sns.eu-west-1.amazonaws.com/?#{query}")
@@ -22,9 +17,11 @@ RSpec.describe 'subscription confirmation' do
     {
       Action: 'ConfirmSubscription',
       Token: 'abcd1234' * 32,
-      TopicArn: 'arn:aws:sns:eu-west-1:111111111111:example-topic'
+      TopicArn: "arn:aws:sns:eu-west-1:111111111111:#{topic}"
     }
   end
+
+  let(:topic) { 'example-topic' }
 
   let(:action) do
     post '/rails/action_mailbox/amazon/inbound_emails',
@@ -44,6 +41,24 @@ RSpec.describe 'subscription confirmation' do
     it 'does not fetch subscription URL' do
       action
       expect(subscription_confirmation_request).to_not have_been_requested
+    end
+  end
+
+  context 'unrecognized topic' do
+    let(:type) { 'unrecognized_topic_subscription_request' }
+    let(:topic) { 'unrecognized-topic' }
+    it 'does not fetch subscription URL' do
+      action
+      expect(subscription_confirmation_request).to_not have_been_requested
+    end
+  end
+
+  context 'recognized topic' do
+    let(:type) { 'recognized_topic_subscription_request' }
+    let(:topic) { 'recognized-topic' }
+    it 'fetches subscription URL' do
+      action
+      expect(subscription_confirmation_request).to have_been_requested
     end
   end
 end

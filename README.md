@@ -1,38 +1,55 @@
 # ActionMailboxAmazonIngress
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/action_mailbox_amazon_ingress`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Provides _Amazon SES/SNS_ integration with [_Rails ActionMailbox_](https://guides.rubyonrails.org/action_mailbox_basics.html).
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'action_mailbox_amazon_ingress'
+gem 'action_mailbox_amazon_ingress', '~> 0.1.0'
 ```
 
-And then execute:
+## Configuration
 
-    $ bundle
+### Amazon SES/SNS
 
-Or install it yourself as:
+Configure _SES_ to [route emails through SNS](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/configure-sns-notifications.html).
 
-    $ gem install action_mailbox_amazon_ingress
+If your website is hosted at https://www.example.com then configure _SNS_ to publish the _SES_ notification topic to this _HTTP_ endpoint:
 
-## Usage
+https://example.com/rails/action_mailbox/amazon/inbound_emails
 
-TODO: Write usage instructions here
+### Rails
+
+Configure _ActionMailbox_ to accept emails from Amazon SES:
+
+```
+# config/environments/production.rb
+config.action_mailbox.ingress = :amazon
+```
+
+Configure which _SNS_ topics will be accepted:
+
+```
+# config/environments/production.rb
+config.action_mailbox.amazon.subscribed_topics = %w(
+  arn:aws:sns:eu-west-1:123456789001:example-topic-1
+  arn:aws:sns:us-east-1:123456789002:example-topic-2
+)
+```
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+Ensure _Rubocop_, _RSpec_, and _StrongVersions_ compliance by running `make`:
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```
+make
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/action_mailbox_amazon_ingress.
+Pull requests are welcome.
 
 ## License
 

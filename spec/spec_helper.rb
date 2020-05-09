@@ -14,7 +14,15 @@ require File.join(__dir__, 'support', 'dummy', 'config', 'environment.rb')
 
 ActiveRecord::Base.connection.migration_context.migrate
 
+module FixtureHelper
+  def fixture(name, type)
+    root = ActionMailboxAmazonIngress.root
+    File.read(root.join('spec', 'fixtures', type.to_s, "#{name}.#{type}"))
+  end
+end
+
 RSpec.configure do |config|
+  config.include FixtureHelper
   config.example_status_persistence_file_path = '.rspec_status'
   config.disable_monkey_patching!
   config.infer_spec_type_from_file_location!

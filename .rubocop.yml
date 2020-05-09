@@ -5,10 +5,6 @@ Metrics/AbcSize:
   Exclude:
     - 'db/migrate/**/*.rb'
 
-Metrics/MethodLength:
-  Exclude:
-    - 'db/migrate/**/*.rb'
-
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
@@ -16,5 +12,21 @@ Metrics/BlockLength:
 AllCops:
   Exclude:
     - 'bin/**/*'
+    - 'db/migrate/**/*.rb'
     - 'vendor/**/*'
     - 'spec/support/dummy/**/*'
+
+Layout/SpaceAroundMethodCallOperator:
+  Enabled: true
+Lint/RaiseException:
+  Enabled: true
+Lint/StructNewOverride:
+  Enabled: true
+Style/ExponentialNotation:
+  Enabled: true
+Style/HashEachMethods:
+  Enabled: true
+Style/HashTransformKeys:
+  Enabled: true
+Style/HashTransformValues:
+  Enabled: true

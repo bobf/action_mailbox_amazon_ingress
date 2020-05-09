@@ -1,5 +1,4 @@
-require 'action_mailbox_amazon_ingress'
+# frozen_string_literal: true
 
 Rails.application.routes.draw do
-  mount ActionMailboxAmazonIngress::Engine, at: '/'
 end
