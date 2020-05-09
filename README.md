@@ -39,6 +39,12 @@ config.action_mailbox.amazon.subscribed_topics = %w(
 )
 ```
 
+Subscriptions will now be auto-confirmed and messages will be delivered via _ActionMailbox_.
+
+Note that even if you manually confirm subscriptions you will still need to provide a list of subscribed topics; messages from unrecognized topics will be ignored.
+
+See [ActionMailbox documentation](https://guides.rubyonrails.org/action_mailbox_basics.html) for full usage information.
+
 ## Development
 
 Ensure _Rubocop_, _RSpec_, and _StrongVersions_ compliance by running `make`:
