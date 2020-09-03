@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Layout/LineLength
 module ActionMailbox
   # Ingests inbound emails from Amazon SES/SNS and confirms subscriptions.
   #
@@ -50,7 +49,7 @@ module ActionMailbox
   #    If your application is found at <tt>https://example.com</tt> you would
   #    specify the fully-qualified URL <tt>https://example.com/rails/action_mailbox/amazon/inbound_emails</tt>.
   #
-  # rubocop:enable Layout/LineLength
+
   module Ingresses
     module Amazon
       class InboundEmailsController < ActionMailbox::BaseController

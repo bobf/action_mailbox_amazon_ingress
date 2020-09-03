@@ -2,10 +2,13 @@
 
 require 'bundler/setup'
 require 'action_mailbox_amazon_ingress'
+require 'devpack'
 require 'webmock/rspec'
 require 'rails'
 require 'action_controller/railtie'
 require 'rspec/rails'
+require 'rspec/its'
+require 'action_mailbox_amazon_ingress/rspec'
 
 ENV['RAILS_ENV'] = 'production'
 ENV['SECRET_KEY_BASE'] = 'test-secret-key-base'
@@ -23,6 +26,7 @@ end
 
 RSpec.configure do |config|
   config.include FixtureHelper
+  config.before { ActionMailbox::InboundEmail.destroy_all }
   config.example_status_persistence_file_path = '.rspec_status'
   config.disable_monkey_patching!
   config.infer_spec_type_from_file_location!

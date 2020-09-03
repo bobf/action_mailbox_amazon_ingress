@@ -8,8 +8,10 @@ Metrics/AbcSize:
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
+    - 'action_mailbox_amazon_ingress.gemspec'
 
 AllCops:
+  NewCops: enable
   Exclude:
     - 'bin/**/*'
     - 'db/migrate/**/*.rb'
