@@ -25,6 +25,7 @@ RSpec.describe 'subscription confirmation' do
 
   let(:action) do
     post '/rails/action_mailbox/amazon/inbound_emails',
+         headers: { 'Content-Type' => 'application/json' },
          params: fixture(type, :json)
   end
 

@@ -45,6 +45,58 @@ Note that even if you manually confirm subscriptions you will still need to prov
 
 See [ActionMailbox documentation](https://guides.rubyonrails.org/action_mailbox_basics.html) for full usage information.
 
+## Testing
+
+### RSpec
+
+Two _RSpec_ _request spec_ helpers are provided to facilitate testing _Amazon SNS/SES_ notifications in your application:
+
+* `amazon_ingress_deliver_subscription_confirmation`
+* `amazon_ingress_deliver_email`
+
+Include the `ActionMailboxAmazonIngress::RSpec` extension in your tests:
+
+```ruby
+# spec/rails_helper.rb
+
+require 'action_mailbox_amazon_ingress/rspec'
+
+RSpec.configure do |config|
+  config.include ActionMailboxAmazonIngress::RSpec
+end
+```
+
+Configure your _test_ environment to accept the default topic used by the provided helpers:
+
+```ruby
+# config/environments/test.rb
+
+config.action_mailbox.amazon.subscribed_topics = ['topic:arn:default']
+```
+
+#### Example Usage
+
+```ruby
+# spec/requests/amazon_emails_spec.rb
+
+RSpec.describe 'amazon emails', type: :request do
+  it 'delivers a subscription notification' do
+    amazon_ingress_deliver_subscription_confirmation
+    expect(response).to have_http_status :ok
+  end
+
+  it 'delivers an email notification' do
+    amazon_ingress_deliver_email(mail: Mail.new(to: 'user@example.com'))
+    expect(ActionMailbox::InboundEmail.first.mail.recipients).to eql ['user@example.com']
+  end
+end
+```
+
+You may also pass the following keyword arguments to both helpers:
+
+* `topic`: The _SNS_ topic used for each notification (default: `topic:arn:default`).
+* `authentic`: The `Aws::SNS::MessageVerifier` class is stubbed by these helpers; set `authentic` to `true` or `false` to define how it will verify incoming notifications (default: `true`).
+
 ## Development
 
 Ensure _Rubocop_, _RSpec_, and _StrongVersions_ compliance by running `make`:

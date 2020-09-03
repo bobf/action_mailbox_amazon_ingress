@@ -9,6 +9,7 @@ Gem::Specification.new do |spec|
   spec.version       = ActionMailboxAmazonIngress::VERSION
   spec.authors       = ['Bob Farrell']
   spec.email         = ['git@bob.frl']
+  spec.required_ruby_version = '~> 2.7'
 
   spec.summary       = 'Amazon SES ingress for Rails ActionMailbox'
   spec.description   = 'Integrate Amazon SES with ActionMailbox'
@@ -28,10 +29,12 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rails', '~> 6.0'
 
   spec.add_development_dependency 'betterp', '~> 0.1.3'
+  spec.add_development_dependency 'devpack', '~> 0.2.1'
   spec.add_development_dependency 'rake', '~> 13.0'
+  spec.add_development_dependency 'rspec-its', '~> 1.3'
   spec.add_development_dependency 'rspec-rails', '~> 4.0'
-  spec.add_development_dependency 'rubocop', '~> 0.82.0'
+  spec.add_development_dependency 'rubocop', '~> 0.90.0'
   spec.add_development_dependency 'sqlite3', '~> 1.4'
-  spec.add_development_dependency 'strong_versions', '~> 0.4.3'
+  spec.add_development_dependency 'strong_versions', '~> 0.4.5'
   spec.add_development_dependency 'webmock', '~> 3.8'
 end
