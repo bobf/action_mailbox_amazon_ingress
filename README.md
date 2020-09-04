@@ -87,7 +87,7 @@ RSpec.describe 'amazon emails', type: :request do
 
   it 'delivers an email notification' do
     amazon_ingress_deliver_email(mail: Mail.new(to: 'user@example.com'))
-    expect(ActionMailbox::InboundEmail.first.mail.recipients).to eql ['user@example.com']
+    expect(ActionMailbox::InboundEmail.last.mail.recipients).to eql ['user@example.com']
   end
 end
 ```
