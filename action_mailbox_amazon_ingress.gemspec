@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.version       = ActionMailboxAmazonIngress::VERSION
   spec.authors       = ['Bob Farrell']
   spec.email         = ['git@bob.frl']
-  spec.required_ruby_version = '~> 2.7'
+  spec.required_ruby_version = '>= 2.5'
 
   spec.summary       = 'Amazon SES ingress for Rails ActionMailbox'
   spec.description   = 'Integrate Amazon SES with ActionMailbox'
