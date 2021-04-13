@@ -2,8 +2,6 @@
 
 Provides _Amazon SES/SNS_ integration with [_Rails ActionMailbox_](https://guides.rubyonrails.org/action_mailbox_basics.html).
 
-**Note that Rails 6.1 is not supported yet. This will be fixed ASAP but, for now, you must use Rails 6.0 in order to use this gem.**
-
 ## Installation
 
 Add this line to your application's Gemfile:
