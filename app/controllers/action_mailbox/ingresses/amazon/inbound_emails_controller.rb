@@ -115,7 +115,9 @@ module ActionMailbox
           return nil unless notification['Type'] == 'Notification'
           return nil unless message['notificationType'] == 'Received'
 
-          message['content']
+          message['content'].tap do |raw_email|
+            raw_email.prepend("X-Original-To: ", message.dig('mail', 'destination').first, "\n") if message.dig('mail', 'destination')
+          end
         end
 
         def topic
