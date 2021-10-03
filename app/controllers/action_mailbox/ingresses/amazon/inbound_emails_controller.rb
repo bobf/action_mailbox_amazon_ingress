@@ -115,7 +115,17 @@ module ActionMailbox
           return nil unless notification['Type'] == 'Notification'
           return nil unless message['notificationType'] == 'Received'
 
-          message['content']
+          message_content
+        end
+
+        def message_content
+          return message['content'] unless destination
+
+          "X-Original-To: #{destination}\n#{message['content']}"
+        end
+
+        def destination
+          message.dig('mail', 'destination')
         end
 
         def topic
