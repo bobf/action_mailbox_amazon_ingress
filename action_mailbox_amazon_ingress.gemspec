@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_runtime_dependency 'aws-sdk-sns', '~> 1.23'
-  spec.add_dependency 'rails', ['~> 6.0', '~> 7.0']
+  spec.add_dependency 'rails', ['> 5', '< 7.1']
 
   spec.add_development_dependency 'betterp', '~> 0.1.3'
   spec.add_development_dependency 'devpack', '~> 0.2.1'
