@@ -7,7 +7,7 @@ Provides _Amazon SES/SNS_ integration with [_Rails ActionMailbox_](https://guide
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'action_mailbox_amazon_ingress', '~> 0.1.1'
+gem 'action_mailbox_amazon_ingress', '~> 0.1.2'
 ```
 
 ## Configuration
