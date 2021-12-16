@@ -4,6 +4,7 @@ require 'pathname'
 require 'net/http'
 require 'rails'
 require 'action_mailbox/engine'
+require 'aws-sdk-s3'
 require 'aws-sdk-sns'
 
 require 'action_mailbox_amazon_ingress/engine'
