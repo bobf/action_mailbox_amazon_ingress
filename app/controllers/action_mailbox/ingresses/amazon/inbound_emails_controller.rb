@@ -115,9 +115,17 @@ module ActionMailbox
           return nil unless notification['Type'] == 'Notification'
           return nil unless message['notificationType'] == 'Received'
 
-          message['content'].tap do |raw_email|
-            raw_email.prepend("X-Original-To: ", message.dig('mail', 'destination').first, "\n") if message.dig('mail', 'destination')
-          end
+          message_content
+        end
+
+        def message_content
+          return message['content'] unless destination
+
+          "X-Original-To: #{destination}\n#{message['content']}"
+        end
+
+        def destination
+          message.dig('mail', 'destination')
         end
 
         def topic
