@@ -21,12 +21,10 @@ Gem::Specification.new do |spec|
       f.match(%r{^(test|spec|features)/})
     end
   end
-  spec.bindir        = 'bin'
-  spec.executables   = []
   spec.require_paths = ['lib']
 
   spec.add_runtime_dependency 'aws-sdk-sns', '~> 1.23'
-  spec.add_dependency 'rails', '>= 6.0'
+  spec.add_dependency 'actionmailbox', '>= 6.0'
 
   spec.add_development_dependency 'devpack', '~> 0.3.3'
   spec.add_development_dependency 'rake', '~> 13.0'
