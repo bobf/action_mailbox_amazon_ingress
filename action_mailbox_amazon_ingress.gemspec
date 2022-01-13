@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_runtime_dependency 'aws-sdk-sns', '~> 1.23'
-  spec.add_dependency 'actionmailbox', '>= 6.1'
+  spec.add_dependency 'actionmailbox', '>= 6.0'
 
   spec.add_development_dependency 'devpack', '~> 0.3.3'
   spec.add_development_dependency 'rake', '~> 13.0'
