@@ -3,10 +3,11 @@
 module ActionMailboxAmazonIngress
   module RSpec
     class Email
-      def initialize(authentic: true, topic: 'topic:arn:default', mail: default_mail)
+      def initialize(authentic: true, topic: 'topic:arn:default', mail: default_mail, message_params: {})
         @authentic = authentic
         @topic = topic
         @mail = mail
+        @message_params = message_params
       end
 
       def headers
@@ -21,11 +22,15 @@ module ActionMailboxAmazonIngress
         {
           'Type' => 'Notification',
           'TopicArn' => @topic,
-          'Message' => {
-            'notificationType' => 'Received',
-            'content' => @mail.encoded
-          }.to_json
+          'Message' => message_json
         }
+      end
+
+      def message_json
+        {
+          'notificationType' => 'Received',
+          'content' => @mail.encoded
+        }.merge(@message_params).to_json
       end
 
       def authentic?
