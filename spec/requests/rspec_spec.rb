@@ -52,11 +52,13 @@ RSpec.describe 'rspec' do
 
       it 'extracts recipient email from SNS notification content' do
         amazon_ingress_deliver_email(
-          mail: Mail.new,
-          message_params: { 'mail' => { 'destination' => 'user@example.com' } }
+          mail: Mail.new(to: 'user@example.com'),
+          message_params: { 'mail' => { 'destination' => ['bcc_user@example.com'] } }
         )
 
-        expect(ActionMailbox::InboundEmail.last.mail.recipients).to eql ['user@example.com']
+        expect(ActionMailbox::InboundEmail.last.mail.recipients).to contain_exactly(
+          'user@example.com', 'bcc_user@example.com'
+        )
       end
     end
   end

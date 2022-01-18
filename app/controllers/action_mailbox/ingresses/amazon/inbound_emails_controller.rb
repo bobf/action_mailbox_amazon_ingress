@@ -125,7 +125,7 @@ module ActionMailbox
         end
 
         def destination
-          message.dig('mail', 'destination')
+          message.dig('mail', 'destination')&.first
         end
 
         def topic
