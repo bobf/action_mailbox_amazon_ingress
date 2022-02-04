@@ -121,6 +121,8 @@ module ActionMailbox
           return nil unless notification['Type'] == 'Notification'
 
           if receipt.dig("action", "type") == "S3"
+            puts "receipt:::::::::"
+            puts receipt
             bucket_name = receipt.dig("action", "bucketName")
             object_key_prefix = receipt.dig("action", "objectKeyPrefix")
             object_key = receipt.dig("action", "objectKey")
