@@ -115,34 +115,36 @@ module ActionMailbox
           @receipt ||= message['receipt']
         end
         
+        def s3_mail 
+          bucket_name = receipt.dig("action", "bucketName")
+          object_key_prefix = receipt.dig("action", "objectKeyPrefix")
+          object_key = receipt.dig("action", "objectKey")
+          key = [object_key_prefix, object_key].compact.join("/")
+
+          s3 = Aws::S3::Client.new
+          s3_object = s3.get_object(bucket: bucket_name, key: key)
+
+          # if the email was encrypted
+          x_amz_matdesc = s3_object.metadata['x-amz-matdesc']
+          if x_amz_matdesc 
+            kms_cmk_id = JSON.parse(x_amz_matdesc)['kms_cmk_id']
+            s3_encryption = Aws::S3::EncryptionV2::Client.new(client: s3, kms_key_id: kms_cmk_id, key_wrap_schema: :kms_context, content_encryption_schema: :aes_gcm_no_padding, security_profile: :v2_and_legacy)
+            s3_object = s3_encryption.get_object(bucket: bucket_name, key: key)
+          end
+
+          @mail = s3_object.body.read
+
+          s3.delete_object(bucket: bucket_name, key: key)
+
+          return @mail
+        end
+
         def mail
           return @mail if @mail
           
           return nil unless notification['Type'] == 'Notification'
 
-          if receipt.dig("action", "type") == "S3"
-            puts "receipt:::::::::"
-            puts receipt
-            bucket_name = receipt.dig("action", "bucketName")
-            object_key_prefix = receipt.dig("action", "objectKeyPrefix")
-            object_key = receipt.dig("action", "objectKey")
-            key = [object_key_prefix, object_key].compact_blank.join("/")
-
-            s3 = Aws::S3::Client.new
-            s3_object = s3.get_object(bucket: bucket_name, key: key)
-
-            # if the email was encrypted
-            if kms_cmk_id = JSON.parse(s3_object.metadata['x-amz-matdesc'])['kms_cmk_id']
-              s3_encryption = Aws::S3::EncryptionV2::Client.new(client: s3, kms_key_id: kms_cmk_id, key_wrap_schema: :kms_context, content_encryption_schema: :aes_gcm_no_padding, security_profile: :v2_and_legacy)
-              s3_object = s3_encryption.get_object(bucket: bucket_name, key: key)
-            end
-
-            @mail = s3_object.body.read
-
-            s3.delete_object(bucket: bucket_name, key: key)
-
-            return @mail
-          end
+          return s3_mail if receipt.dig("action", "type") == "S3"
 
           return nil unless message['notificationType'] == 'Received'
 
