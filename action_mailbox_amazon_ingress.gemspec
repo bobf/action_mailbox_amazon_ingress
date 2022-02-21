@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'aws-sdk-sns', '~> 1.23'
   spec.add_runtime_dependency 'aws-sdk-s3', '~> 1.103'
-  spec.add_dependency 'rails', '~> 6'
+  spec.add_dependency 'rails', '>= 6'
 
   spec.add_development_dependency 'betterp', '~> 0.1.3'
   spec.add_development_dependency 'devpack', '~> 0.2.1'
