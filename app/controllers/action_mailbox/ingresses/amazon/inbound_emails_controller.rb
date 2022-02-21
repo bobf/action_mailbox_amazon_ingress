@@ -58,10 +58,12 @@ module ActionMailbox
         before_action :confirm_subscription
 
         def create
-          head :bad_request unless mail.present?
-
-          ActionMailbox::InboundEmail.create_and_extract_message_id!(mail)
-          head :no_content
+          if mail.present?
+            ActionMailbox::InboundEmail.create_and_extract_message_id!(mail)
+            head :no_content
+          else
+            head :bad_request
+          end
         end
 
         private
@@ -100,11 +102,41 @@ module ActionMailbox
         end
 
         def verified?
-          verifier.authentic?(@notification.to_json)
+          verifier.authentic?(@notification.to_json)  
+        rescue => e
+          debugger
+          Rails.logger.error(e)
+          false
         end
 
         def verifier
           Aws::SNS::MessageVerifier.new
+        end
+
+        def s3
+          bucket_name = receipt.dig("action", "bucketName")
+          object_key_prefix = receipt.dig("action", "objectKeyPrefix")
+          object_key = receipt.dig("action", "objectKey")
+          key = [object_key_prefix, object_key].compact_blank.join("/")
+
+          s3_client = Aws::S3::Client.new
+          s3_object = s3_client.get_object(bucket: bucket_name, key: key)
+
+          # if the email was encrypted
+          if kms_cmk_id = JSON.parse(s3_object.metadata['x-amz-matdesc'])['kms_cmk_id']
+            s3_encryption_client = Aws::S3::EncryptionV2::Client.new(client: s3_client, kms_key_id: kms_cmk_id, key_wrap_schema: :kms_context, content_encryption_schema: :aes_gcm_no_padding, security_profile: :v2_and_legacy)
+            s3_object = s3_encryption_client.get_object(bucket: bucket_name, key: key)
+          end
+
+          email_content = s3_object.body.read
+
+          s3_client.delete_object(bucket: bucket_name, key: key)
+
+          return email_content
+        rescue Aws::S3::Errors::ServiceError => e
+          debugger
+          Rails.logger.error(e)
+          return nil
         end
 
         def message
@@ -117,36 +149,10 @@ module ActionMailbox
 
         def mail
           return @mail if @mail
-          
           return nil unless notification['Type'] == 'Notification'
-
-          # the email was stored in S3
-          if receipt.dig("action", "type") == "S3"
-            bucket_name = receipt.dig("action", "bucketName")
-            object_key_prefix = receipt.dig("action", "objectKeyPrefix")
-            object_key = receipt.dig("action", "objectKey")
-            key = [object_key_prefix, object_key].compact_blank.join("/")
-
-            s3 = Aws::S3::Client.new
-            s3_object = s3.get_object(bucket: bucket_name, key: key)
-
-            # if the email was encrypted
-            if kms_cmk_id = JSON.parse(s3_object.metadata['x-amz-matdesc'])['kms_cmk_id']
-              s3_encryption = Aws::S3::EncryptionV2::Client.new(client: s3, kms_key_id: kms_cmk_id, key_wrap_schema: :kms_context, content_encryption_schema: :aes_gcm_no_padding, security_profile: :v2_and_legacy)
-              s3_object = s3_encryption.get_object(bucket: bucket_name, key: key)
-            end
-
-            @mail = s3_object.body.read
-
-            s3.delete_object(bucket: bucket_name, key: key)
-
-            return @mail
-          end
-
+          return @mail = s3 if receipt.dig('action', 'type') == 'S3'
           return nil unless message['notificationType'] == 'Received'
-          
-          @mail = message['content']
-          @mail
+          return @mail = message['content']
         end
 
         def topic
