@@ -59,9 +59,11 @@ module ActionMailbox
 
         def create
           if mail.present?
+            Rails.logger.info{"[action_mailbox_amazon_ingress] Inbound email received."}
             ActionMailbox::InboundEmail.create_and_extract_message_id!(mail)
             head :no_content
           else
+            Rails.logger.info{"[action_mailbox_amazon_ingress] Inbound email ignored (mail object missing)."}
             head :bad_request
           end
         end
@@ -77,34 +79,41 @@ module ActionMailbox
           return unless notification['Type'] == 'SubscriptionConfirmation'
           return head :ok if confirmation_response_code&.start_with?('2')
 
-          Rails.logger.error('SNS subscription confirmation request rejected.')
+          Rails.logger.error{'SNS subscription confirmation request rejected.'}
           head :unprocessable_entity
         end
 
         def validate_topic
           return if valid_topics.include?(topic)
 
-          Rails.logger.warn("Ignoring unknown topic: #{topic}")
+          Rails.logger.info{"Ignoring unknown topic: #{topic}"}
           head :unauthorized
         end
 
         def confirmation_response_code
           @confirmation_response_code ||= begin
-            Net::HTTP.get_response(URI(notification['SubscribeURL'])).code
+            Rails.logger.info{"[action_mailbox_amazon_ingress] Confirming SNS subscription for topic"}
+            response_code = Net::HTTP.get_response(URI(notification['SubscribeURL'])).code
+            Rails.logger.info{"[action_mailbox_amazon_ingress] Confirmed SNS subscription for topic with response code #{response_code}"}
           end
         end
 
         def notification
-          @notification ||= JSON.parse(request.body.read)
+          unless @notification
+            @notification = JSON.parse(request.body.read)
+            Rails.logger.debug{"[action_mailbox_amazon_ingress] SNS notification successfully parsed."}
+          end
+          @notification
         rescue JSON::ParserError => e
-          Rails.logger.warn("Unable to parse SNS notification: #{e}")
+          Rails.logger.warn{"[action_mailbox_amazon_ingress] Unable to parse SNS notification: #{e}"}
           nil
         end
 
         def verified?
-          verifier.authentic?(@notification.to_json)  
+          verifier.authentic?(@notification.to_json)
+          Rails.logger.debug{"[action_mailbox_amazon_ingress] SNS notification verified."}
         rescue => e
-          Rails.logger.error(e)
+          Rails.logger.info{"[action_mailbox_amazon_ingress] Unable to verify SNS authenticity: #{e}"}
           false
         end
 
@@ -118,18 +127,26 @@ module ActionMailbox
           object_key = receipt.dig("action", "objectKey")
           key = [object_key_prefix, object_key].compact_blank.join("/")
 
+          Rails.logger.debug{"[action_mailbox_amazon_ingress] Downloading S3 object #{key} from bucket #{bucket_name}"}
           s3_client = Aws::S3::Client.new
           s3_object = s3_client.get_object(bucket: bucket_name, key: key)
 
           # if the email was encrypted
           if kms_cmk_id = JSON.parse(s3_object.metadata['x-amz-matdesc'])['kms_cmk_id']
+            Rails.logger.debug{"[action_mailbox_amazon_ingress] Decrypting S3 object #{key} from bucket #{bucket_name} with KMS CMK #{kms_cmk_id}"}
             s3_encryption_client = Aws::S3::EncryptionV2::Client.new(client: s3_client, kms_key_id: kms_cmk_id, key_wrap_schema: :kms_context, content_encryption_schema: :aes_gcm_no_padding, security_profile: :v2_and_legacy)
             s3_object = s3_encryption_client.get_object(bucket: bucket_name, key: key)
+          else
+            Rails.logger.debug{"[action_mailbox_amazon_ingress] S3 object #{key} from bucket #{bucket_name} is not encrypted"}
           end
 
+          Rails.logger.debug{"[action_mailbox_amazon_ingress] S3 object #{key} from bucket #{bucket_name} successfully downloaded"}
           email_content = s3_object.body.read
 
+          Rails.logger.debug{"[action_mailbox_amazon_ingress] Deleteing S3 object #{key} from bucket #{bucket_name}"}
           s3_client.delete_object(bucket: bucket_name, key: key)
+
+          Rails.logger.debug{"[action_mailbox_amazon_ingress] S3 object #{key} from bucket #{bucket_name} successfully deleted"}
 
           return email_content
         rescue Aws::S3::Errors::ServiceError => e
