@@ -104,7 +104,6 @@ module ActionMailbox
         def verified?
           verifier.authentic?(@notification.to_json)  
         rescue => e
-          debugger
           Rails.logger.error(e)
           false
         end
@@ -134,7 +133,6 @@ module ActionMailbox
 
           return email_content
         rescue Aws::S3::Errors::ServiceError => e
-          debugger
           Rails.logger.error(e)
           return nil
         end
