@@ -77,7 +77,7 @@ module ActionMailbox
 
         def confirm_subscription
           return unless notification['Type'] == 'SubscriptionConfirmation'
-          return head :ok if confirmation_response_code&.start_with?('2')
+          return head :ok if confirmation_response_code&.to_s&.start_with?('2')
 
           Rails.logger.error{'SNS subscription confirmation request rejected.'}
           head :unprocessable_entity
