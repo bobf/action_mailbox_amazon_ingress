@@ -141,7 +141,7 @@ module ActionMailbox
           end
 
           Rails.logger.debug{"[action_mailbox_amazon_ingress] S3 object #{key} from bucket #{bucket_name} successfully downloaded"}
-          email_content = s3_object.body.read
+          email_content = s3_object.body.read&.scrub("?")
 
           Rails.logger.debug{"[action_mailbox_amazon_ingress] Deleteing S3 object #{key} from bucket #{bucket_name}"}
           s3_client.delete_object(bucket: bucket_name, key: key)
