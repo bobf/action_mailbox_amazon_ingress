@@ -8,8 +8,9 @@ RSpec.describe 'inbound email' do
   before { stub_request(:get, cert_url).and_return(body: fixture(:certificate, :pem)) }
 
   it 'receives inbound email' do
-    body = fixture(:inbound_email, :json)
-    post '/rails/action_mailbox/amazon/inbound_emails', params: body
+    post '/rails/action_mailbox/amazon/inbound_emails', params: JSON.parse(fixture(:inbound_email, :json)), as: :json
+
+    expect(response).to have_http_status(:no_content)
     expect(ActionMailbox::InboundEmail.count).to eql 1
   end
 end

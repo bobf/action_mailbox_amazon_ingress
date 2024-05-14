@@ -9,13 +9,13 @@ Gem::Specification.new do |spec|
   spec.version       = ActionMailboxAmazonIngress::VERSION
   spec.authors       = ['Bob Farrell']
   spec.email         = ['git@bob.frl']
-  spec.required_ruby_version = '>= 2.5'
+  spec.required_ruby_version = '>= 3.2'
 
   spec.summary       = 'Amazon SES ingress for Rails ActionMailbox'
   spec.description   = 'Integrate Amazon SES with ActionMailbox'
   spec.homepage      = 'https://github.com/bobf/action_mailbox_amazon_ingress'
   spec.license       = 'MIT'
-
+  spec.metadata      = { 'rubygems_mfa_required' => 'true' }
   spec.files         = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
       f.match(%r{^(test|spec|features)/})
@@ -23,15 +23,7 @@ Gem::Specification.new do |spec|
   end
   spec.require_paths = ['lib']
 
+  spec.add_runtime_dependency 'aws-sdk-s3', '~> 1.23'
   spec.add_runtime_dependency 'aws-sdk-sns', '~> 1.23'
-  spec.add_dependency 'actionmailbox', '>= 6.0'
-
-  spec.add_development_dependency 'devpack', '~> 0.3.3'
-  spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'rspec-its', '~> 1.3'
-  spec.add_development_dependency 'rspec-rails', '~> 4.0'
-  spec.add_development_dependency 'rubocop', '~> 0.90.0'
-  spec.add_development_dependency 'sqlite3', '~> 1.4'
-  spec.add_development_dependency 'strong_versions', '~> 0.4.5'
-  spec.add_development_dependency 'webmock', '~> 3.8'
+  spec.add_dependency 'actionmailbox', '~> 7.1'
 end

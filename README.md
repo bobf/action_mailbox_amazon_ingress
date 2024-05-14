@@ -99,6 +99,12 @@ You may also pass the following keyword arguments to both helpers:
 
 ## Development
 
+### Setup
+
+`bin/setup`
+
+### Testing
+
 Ensure _Rubocop_, _RSpec_, and _StrongVersions_ compliance by running `make`:
 
 ```

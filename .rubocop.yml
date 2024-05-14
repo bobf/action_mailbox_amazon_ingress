@@ -12,6 +12,7 @@ Metrics/BlockLength:
 
 AllCops:
   NewCops: enable
+  SuggestExtensions: false
   Exclude:
     - 'bin/**/*'
     - 'db/migrate/**/*.rb'
@@ -32,3 +33,6 @@ Style/HashTransformKeys:
   Enabled: true
 Style/HashTransformValues:
   Enabled: true
+
+Style/HashSyntax:
+  Enabled: false

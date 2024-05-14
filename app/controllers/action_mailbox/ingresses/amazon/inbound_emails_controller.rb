@@ -87,9 +87,7 @@ module ActionMailbox
         end
 
         def confirmation_response_code
-          @confirmation_response_code ||= begin
-            Net::HTTP.get_response(URI(notification['SubscribeURL'])).code
-          end
+          @confirmation_response_code ||= Net::HTTP.get_response(URI(notification['SubscribeURL'])).code
         end
 
         def notification

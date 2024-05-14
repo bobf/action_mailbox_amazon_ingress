@@ -5,7 +5,7 @@ require "action_view/railtie"
 Bundler.require(*Rails.groups)
 module Dummy
   class Application < Rails::Application
-    config.load_defaults 6.0
+    config.load_defaults 7.1
     config.api_only = true
     config.paths['db/migrate'] = 'spec/support/dummy/db/migrate'
   end
