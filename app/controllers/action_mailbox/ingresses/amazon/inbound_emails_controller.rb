@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'action_mailbox_amazon_ingress/sns_notification'
+
 module ActionMailbox
   # Ingests inbound emails from Amazon SES/SNS and confirms subscriptions.
   #
@@ -26,41 +28,16 @@ module ActionMailbox
   # - <tt>401 Unauthorized</tt> if a request does not contain a valid signature
   # - <tt>404 Not Found</tt> if the Amazon ingress has not been configured
   # - <tt>422 Unprocessable Entity</tt> if a request provides invalid parameters
-  #
-  # == Usage
-  #
-  # 1. Tell Action Mailbox to accept emails from Amazon SES:
-  #
-  #        # config/environments/production.rb
-  #        config.action_mailbox.ingress = :amazon
-  #
-  # 2. Configure which SNS topics will be accepted:
-  #
-  #        config.action_mailbox.amazon.subscribed_topics = %w(
-  #          arn:aws:sns:eu-west-1:123456789001:example-topic-1
-  #          arn:aws:sns:us-east-1:123456789002:example-topic-2
-  #        )
-  #
-  # 3. {Configure SES}[https://docs.aws.amazon.com/ses/latest/DeveloperGuide/receiving-email-notifications.html]
-  #    to route emails through SNS.
-  #
-  #    Configure SNS to send emails to +/rails/action_mailbox/amazon/inbound_emails+.
-  #
-  #    If your application is found at <tt>https://example.com</tt> you would
-  #    specify the fully-qualified URL <tt>https://example.com/rails/action_mailbox/amazon/inbound_emails</tt>.
-  #
 
   module Ingresses
     module Amazon
       class InboundEmailsController < ActionMailbox::BaseController
-        before_action :verify_authenticity
-        before_action :validate_topic
-        before_action :confirm_subscription
+        before_action :verify_authenticity, :validate_topic, :confirm_subscription
 
         def create
-          head :bad_request unless mail.present?
+          head :bad_request unless notification.message_content.present?
 
-          ActionMailbox::InboundEmail.create_and_extract_message_id!(mail)
+          ActionMailbox::InboundEmail.create_and_extract_message_id!(notification.message_content)
           head :no_content
         end
 
@@ -68,68 +45,30 @@ module ActionMailbox
 
         def verify_authenticity
           head :bad_request unless notification.present?
-          head :unauthorized unless verified?
+          head :unauthorized unless notification.verified?
         end
 
         def confirm_subscription
-          return unless notification['Type'] == 'SubscriptionConfirmation'
-          return head :ok if confirmation_response_code&.start_with?('2')
+          return unless notification.type == 'SubscriptionConfirmation'
+          return head :ok if notification.subscription_confirmed?
 
           Rails.logger.error('SNS subscription confirmation request rejected.')
           head :unprocessable_entity
         end
 
         def validate_topic
-          return if valid_topics.include?(topic)
+          return if valid_topics.include?(notification.topic)
 
           Rails.logger.warn("Ignoring unknown topic: #{topic}")
           head :unauthorized
         end
 
-        def confirmation_response_code
-          @confirmation_response_code ||= Net::HTTP.get_response(URI(notification['SubscribeURL'])).code
-        end
-
         def notification
-          @notification ||= JSON.parse(request.body.read)
-        rescue JSON::ParserError => e
-          Rails.logger.warn("Unable to parse SNS notification: #{e}")
-          nil
-        end
-
-        def verified?
-          verifier.authentic?(@notification.to_json)
-        end
-
-        def verifier
-          Aws::SNS::MessageVerifier.new
-        end
-
-        def message
-          @message ||= JSON.parse(notification['Message'])
-        end
-
-        def mail
-          return nil unless notification['Type'] == 'Notification'
-          return nil unless message['notificationType'] == 'Received'
-
-          message_content
-        end
-
-        def message_content
-          return message['content'] unless destination
-
-          "X-Original-To: #{destination}\n#{message['content']}"
-        end
-
-        def destination
-          message.dig('mail', 'destination')&.first
+          @notification ||= ActionMailboxAmazonIngress::SnsNotification.new(request.raw_post)
         end
 
         def topic
-          return nil unless notification.present?
-
-          notification['TopicArn']
+          @topic ||= notification.topic
         end
 
         def valid_topics

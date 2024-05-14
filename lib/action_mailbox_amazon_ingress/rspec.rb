@@ -9,15 +9,21 @@ module ActionMailboxAmazonIngress
       subscription_confirmation = SubscriptionConfirmation.new(**options)
       stub_aws_sns_message_verifier(subscription_confirmation)
       stub_aws_sns_subscription_request
-      post subscription_confirmation.url, params: subscription_confirmation.params.to_json,
-                                          headers: subscription_confirmation.headers
+
+      post subscription_confirmation.url,
+           params: subscription_confirmation.params,
+           headers: subscription_confirmation.headers,
+           as: :json
     end
 
     def amazon_ingress_deliver_email(options = {})
       email = Email.new(**options)
       stub_aws_sns_message_verifier(email)
-      post email.url, params: email.params.to_json,
-                      headers: email.headers
+
+      post email.url,
+           params: email.params,
+           headers: email.headers,
+           as: :json
     end
 
     private

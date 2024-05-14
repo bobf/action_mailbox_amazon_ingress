@@ -26,7 +26,7 @@ RSpec.describe 'rspec' do
   end
 
   describe 'email delivery' do
-    context 'recognized topic' do
+    context 'when recognized topic' do
       let(:topic) { 'topic:arn:default' }
       it 'renders 204 No Content' do
         amazon_ingress_deliver_email(mail: Mail.new)
@@ -39,7 +39,7 @@ RSpec.describe 'rspec' do
       end
     end
 
-    context 'unrecognized topic' do
+    context 'when unrecognized topic' do
       let(:topic) { 'topic:arn:other' }
       it 'renders 401 Unauthorized' do
         amazon_ingress_deliver_email
