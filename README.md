@@ -14,22 +14,20 @@ gem 'action_mailbox_amazon_ingress', '~> 0.1.3'
 
 ### Amazon SES/SNS
 
-Configure _SES_ to [route emails through SNS](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/configure-sns-notifications.html).
+1. [Configure SES](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/receiving-email-notifications.html) to (save emails to S3)(https://docs.aws.amazon.com/ses/latest/dg/receiving-email-action-s3.html) or to send them as raw messages.
 
-If your website is hosted at https://www.example.com then configure _SNS_ to publish the _SES_ notification topic to this _HTTP_ endpoint:
-
-https://example.com/rails/action_mailbox/amazon/inbound_emails
+2. [Configure the SNS topic for SES or for the S3 action](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/receiving-email-action-sns.html) to send notifications to +/rails/action_mailbox/amazon/inbound_emails+. For example, if your website is hosted at https://www.example.com then configure _SNS_ to publish the _SES_ notification topic to this _HTTP_ endpoint: https://example.com/rails/action_mailbox/amazon/inbound_emails
 
 ### Rails
 
-Configure _ActionMailbox_ to accept emails from Amazon SES:
+1. Configure _ActionMailbox_ to accept emails from Amazon SES:
 
 ```
 # config/environments/production.rb
 config.action_mailbox.ingress = :amazon
 ```
 
-Configure which _SNS_ topics will be accepted:
+2. Configure which _SNS_ topics will be accepted:
 
 ```
 # config/environments/production.rb
@@ -39,7 +37,7 @@ config.action_mailbox.amazon.subscribed_topics = %w(
 )
 ```
 
-Subscriptions will now be auto-confirmed and messages will be delivered via _ActionMailbox_.
+SNS Subscriptions will now be auto-confirmed and messages will be automatically handled via _ActionMailbox_.
 
 Note that even if you manually confirm subscriptions you will still need to provide a list of subscribed topics; messages from unrecognized topics will be ignored.
 
@@ -99,11 +97,20 @@ You may also pass the following keyword arguments to both helpers:
 
 ## Development
 
+### Setup
+
+`bin/setup`
+
+### Testing
+
 Ensure _Rubocop_, _RSpec_, and _StrongVersions_ compliance by running `make`:
 
 ```
 make
 ```
+### Updating AWS Fixtures
+
+`bundle exec rake sign_aws_fixtures`
 
 ## Contributing
 

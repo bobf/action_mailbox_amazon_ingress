@@ -6,13 +6,6 @@ RSpec.describe 'subscription confirmation' do
     stub_request(:get, "https://sns.eu-west-1.amazonaws.com/?#{query}")
   end
 
-  before do
-    stub_request(
-      :get,
-      'https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-a86cb10b4e1f29c941702d737128f7b6.pem'
-    ).and_return(body: fixture(:certificate, :pem))
-  end
-
   let(:subscription_params) do
     {
       Action: 'ConfirmSubscription',
@@ -27,6 +20,13 @@ RSpec.describe 'subscription confirmation' do
     post '/rails/action_mailbox/amazon/inbound_emails',
          headers: { 'Content-Type' => 'application/json' },
          params: fixture(type, :json)
+  end
+
+  before do
+    stub_request(
+      :get,
+      'https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-a86cb10b4e1f29c941702d737128f7b6.pem'
+    ).and_return(body: fixture(:certificate, :pem))
   end
 
   context 'valid Amazon SSL signature' do
